@@ -67,8 +67,11 @@ button, input, select, textarea { font: inherit; color: inherit; }
 .shell { display: grid; grid-template-columns: 224px minmax(0, 1fr); min-height: 100%; }
 .rail { background: var(--surface); border-right: 1px solid var(--line); padding: 18px 12px; display: flex; flex-direction: column; gap: 18px; position: sticky; top: 0; height: 100vh; }
 .brand { display: flex; align-items: center; gap: 11px; padding: 0 6px; }
-.mark { width: 40px; height: 40px; border-radius: 12px; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; flex: none; }
-.mark svg { width: 23px; height: 23px; }
+.mark { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(145deg, #ffc4d6, #f58bb0); display: grid; place-items: center; flex: none; }
+.mark svg { width: 80%; height: 80%; }
+.tsel { display: flex; gap: 6px; align-items: center; }
+.tsel .i { flex: 1; }
+.tsel b { color: var(--muted); }
 .brand-t { font-family: var(--f-display); font-weight: 700; font-size: 1rem; white-space: nowrap; line-height: 1.2; color: var(--accent-deep); }
 .brand-s { font-size: .76rem; color: var(--muted); line-height: 1.3; }
 .nav { display: grid; gap: 2px; }
@@ -360,7 +363,7 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
   function incDate(r) { return (r.incidentDate || r.createdAt || '').slice(0, 10); }
 
   var ICON = {
-    mark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l9 16H3z"/><path d="M12 10v4M12 17h.01"/></svg>',
+    mark: '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="ip" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#e9eef4"/></linearGradient><linearGradient id="ib" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#dfe7f0"/><stop offset="1" stop-color="#b9c6d4"/></linearGradient><linearGradient id="it" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe066"/><stop offset="1" stop-color="#f7a600"/></linearGradient><radialGradient id="is" cx=".35" cy=".3" r=".8"><stop offset="0" stop-color="#ffb3bd"/><stop offset=".35" stop-color="#ff3d57"/><stop offset="1" stop-color="#b10f2c"/></radialGradient><linearGradient id="ia" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6aa8ff"/><stop offset="1" stop-color="#1e4fd6"/></linearGradient><radialGradient id="ig" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ff2d4f" stop-opacity=".55"/><stop offset="1" stop-color="#ff2d4f" stop-opacity="0"/></radialGradient><filter id="id" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1.6" stdDeviation="1.4" flood-color="#5a1830" flood-opacity=".28"/></filter></defs><rect x="9" y="12" width="32" height="42" rx="4" fill="url(#ib)" filter="url(#id)" transform="rotate(-4 25 33)"/><path d="M17 7h21l10 10v34a3 3 0 0 1-3 3H17a3 3 0 0 1-3-3V10a3 3 0 0 1 3-3z" fill="url(#ip)" filter="url(#id)"/><path d="M38 7v7a3 3 0 0 0 3 3h7z" fill="#d5dee8"/><path d="M31 16.5L41.5 34.5H20.5z" fill="url(#it)" stroke="#f2a100" stroke-width="2.6" stroke-linejoin="round"/><path d="M31 22.5v5.2" stroke="#3a2600" stroke-width="2.6" stroke-linecap="round"/><circle cx="31" cy="31" r="1.5" fill="#3a2600"/><rect x="20" y="39" width="18" height="2.6" rx="1.3" fill="#c3cdd8"/><rect x="20" y="44" width="12" height="2.6" rx="1.3" fill="#c3cdd8"/><circle cx="50" cy="45" r="14" fill="url(#ig)"/><path d="M50 30.2v-3.4M57.8 33.4l2.4-2.4M42.2 33.4l-2.4-2.4" stroke="#ff2d4f" stroke-width="2.4" stroke-linecap="round"/><path d="M42 51v-6.5a8 8 0 0 1 16 0V51z" fill="url(#is)" filter="url(#id)"/><ellipse cx="46.6" cy="42.6" rx="1.8" ry="3" fill="#ffffff" opacity=".75" transform="rotate(20 46.6 42.6)"/><rect x="38.5" y="50.5" width="23" height="6.5" rx="2.2" fill="url(#ia)" filter="url(#id)"/><rect x="40" y="51.4" width="20" height="1.4" rx=".7" fill="#ffffff" opacity=".45"/></svg>',
     add: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/></svg>',
     dash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1.5"/><rect x="14" y="3" width="7" height="5" rx="1.5"/><rect x="14" y="12" width="7" height="9" rx="1.5"/><rect x="3" y="16" width="7" height="5" rx="1.5"/></svg>',
     list: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/></svg>',
@@ -674,7 +677,7 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
       }).join('') + '</div></div></section>' +
       '<section class="rsec"><div class="rsec-h"><span class="n">3</span><h2>เมื่อไหร่ ที่ไหน ใครเกี่ยวข้อง</h2></div>' +
       '<div class="grid3"><label class="f"><span>วันที่เกิดเหตุ <em>*</em></span><input class="i" type="date" id="fDate" max="' + today() + '" value="' + esc(f.incidentDate) + '"></label>' +
-      '<label class="f"><span>เวลาโดยประมาณ</span><input class="i" type="time" id="fTime" value="' + esc(/^\d{2}:\d{2}$/.test(f.incidentTime) ? f.incidentTime : '') + '"></label>' +
+      '<div class="f" style="display:grid;gap:5px"><span class="lab">เวลาโดยประมาณ <span class="hint">00:00–23:59</span></span>' + timeSel('f', f.incidentTime) + '</div>' +
       '<label class="f"><span>สถานที่เกิดเหตุ</span><input class="i" id="fLoc" list="locList" placeholder="เช่น OPD, ห้องยา" value="' + esc(f.location) + '"><datalist id="locList">' + (c.locations || []).map(function (x) { return '<option value="' + esc(x) + '">'; }).join('') + '</datalist></label></div>' +
       '<div class="stack" style="gap:6px"><span class="lab">แผนกที่เกี่ยวข้อง <span class="hint">เลือกได้หลายแผนก</span></span><div class="chips" id="cDept">' + c.departments.map(function (x) { return chip('dept', x, x, f.departments.indexOf(x) >= 0); }).join('') + '</div></div></section>' +
       '<section class="rsec"><div class="rsec-h"><span class="n">4</span><h2>รายละเอียด</h2></div>' +
@@ -697,7 +700,7 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
     function collect() {
       return {
         reporter: qs('#fRep').value.trim(), branch: f.branch, type: f.type, severity: f.severity,
-        incidentDate: qs('#fDate').value, incidentTime: qs('#fTime').value, location: qs('#fLoc').value.trim(),
+        incidentDate: qs('#fDate').value, incidentTime: timeVal('f', el), location: qs('#fLoc').value.trim(),
         departments: f.departments.slice(), petRef: qs('#fPet').value.trim(), detail: qs('#fDetail').value.trim(),
         category: qs('#fCat').value, claim: qs('#fClaim').value.replace(/[^\d.]/g, ''), confidential: qs('#fConf').checked,
         photos: f.photos.map(function (p) { return { mime: p.mime, b64: p.b64 }; })
@@ -751,6 +754,15 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
       }).catch(function (e2) { err.textContent = e2.message; });
     };
   }
+  // เลือกเวลาแบบ 24 ชั่วโมง: ชั่วโมง 00–23 และนาทีทีละ 5
+  function timeSel(p, v) {
+    var m = /^(\d{1,2})[:.](\d{2})/.exec(v || ''), hh = m ? pad2(+m[1] % 24) : '', mm = m ? pad2(Math.round(+m[2] / 5) * 5 % 60) : '';
+    var ho = '<option value="">ชั่วโมง</option>', mo = '';
+    for (var i = 0; i < 24; i++) ho += '<option value="' + pad2(i) + '"' + (pad2(i) === hh ? ' selected' : '') + '>' + pad2(i) + '</option>';
+    for (var j = 0; j < 60; j += 5) mo += '<option value="' + pad2(j) + '"' + (pad2(j) === mm ? ' selected' : '') + '>' + pad2(j) + '</option>';
+    return '<div class="tsel"><select class="i num" id="' + p + 'Hr" aria-label="ชั่วโมง">' + ho + '</select><b>:</b><select class="i num" id="' + p + 'Min" aria-label="นาที">' + mo + '</select><span class="muted small">น.</span></div>';
+  }
+  function timeVal(p, root) { var h = qs('#' + p + 'Hr', root).value; return h ? h + ':' + qs('#' + p + 'Min', root).value : ''; }
   function shrink(file) {
     return new Promise(function (res) {
       var rd = new FileReader();
@@ -1021,7 +1033,7 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
       '<label class="f"><span>ระดับความรุนแรง</span><select class="i" id="eSv">' + SEV.map(function (s) { return '<option value="' + s.v + '"' + (s.v === r.severity ? ' selected' : '') + '>ระดับ ' + s.v + ' ' + esc(s.name) + '</option>'; }).join('') + '</select></label>' +
       '<label class="f"><span>สาขา</span><select class="i" id="eBr"' + (state.user.role === 'branch' ? ' disabled' : '') + '>' + opts(c.branches, r.branch) + '</select></label>' +
       '<label class="f"><span>วันที่เกิดเหตุ</span><input class="i" type="date" id="eDt" value="' + esc(r.incidentDate) + '"></label>' +
-      '<label class="f"><span>เวลา</span><input class="i" id="eTm" value="' + esc(r.incidentTime) + '"></label>' +
+      '<div class="f" style="display:grid;gap:5px"><span class="lab">เวลา' + (r.incidentTime && !/^\d{2}:\d{2}$/.test(r.incidentTime) ? ' <span class="hint">เดิม: ' + esc(r.incidentTime) + '</span>' : '') + '</span>' + timeSel('e', r.incidentTime) + '</div>' +
       '<label class="f"><span>สถานที่</span><input class="i" id="eLo" value="' + esc(r.location) + '"></label>' +
       '<label class="f"><span>ชื่อสัตว์ / HN</span><input class="i" id="ePe" value="' + esc(r.petRef) + '"></label>' +
       '<label class="f"><span>มูลค่าเคลม (บาท)</span><input class="i num" id="eCl" inputmode="decimal" value="' + esc(r.claim || '') + '"></label>' +
@@ -1032,7 +1044,7 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
     qsa('[data-d]', m).forEach(function (b) { b.onclick = function () { var i = depts.indexOf(b.dataset.d); if (i >= 0) depts.splice(i, 1); else depts.push(b.dataset.d); b.setAttribute('aria-pressed', i < 0); }; });
     qs('#edF', m).onsubmit = function (e) {
       e.preventDefault();
-      var p = { type: qs('#eTy', m).value, category: qs('#eCa', m).value, severity: +qs('#eSv', m).value, incidentDate: qs('#eDt', m).value, incidentTime: qs('#eTm', m).value,
+      var p = { type: qs('#eTy', m).value, category: qs('#eCa', m).value, severity: +qs('#eSv', m).value, incidentDate: qs('#eDt', m).value, incidentTime: timeVal('e', m) || (/^\d{2}:\d{2}$/.test(r.incidentTime) ? '' : r.incidentTime),
         location: qs('#eLo', m).value, petRef: qs('#ePe', m).value, claim: qs('#eCl', m).value.replace(/[^\d.]/g, '') || 0, owner: qs('#eOw', m).value, departments: depts, confidential: qs('#eCf', m).checked };
       if (state.user.role !== 'branch') p.branch = qs('#eBr', m).value;
       busy(qs('[type=submit]', m), authed('updateIncident', r.id, p)).then(function (nr) { replaceRow(nr); m.remove(); toast('บันทึกแล้ว'); go('detail', r.id, true); });
