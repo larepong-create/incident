@@ -1073,9 +1073,9 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
       '<label class="f"><span>รหัสแจ้งเหตุ <span class="hint">เว้นว่าง = ใครมีลิงก์ก็แจ้งได้</span></span><input class="i" id="sPin" value="' + esc(s.reportPin || '') + '"></label>' +
       '<label class="f"><span>ลิงก์หน้าเว็บนี้ <span class="hint">ใช้แนบในข้อความ LINE</span></span><input class="i" id="sUrl" placeholder="https://…/incident/" value="' + esc(s.appUrl || '') + '"></label>' +
       '</div></section>' +
-      '<section class="panel stack"><h2>แจ้งเตือน LINE</h2><div class="hint">ใช้ LINE Messaging API: สร้าง Official Account เชิญเข้ากลุ่มผู้บริหาร แล้วนำ Channel access token และ Group ID มาใส่</div><div class="grid3">' +
+      '<section class="panel stack"><h2>แจ้งเตือน LINE</h2><div class="hint">1) ใส่ Channel access token แล้วกดบันทึก · 2) เชิญบอทเข้ากลุ่ม LINE ระบบจะรู้จักกลุ่มเองและตอบในกลุ่มว่าเชื่อมแล้ว (ถ้าบอทอยู่ในกลุ่มก่อนแล้ว พิมพ์ในกลุ่มว่า <b>ตั้งกลุ่มแจ้งเตือน</b>)' + (s.webAppUrl ? '<br>Webhook URL สำหรับ LINE Developers: <span class="mono" style="user-select:all;overflow-wrap:anywhere">' + esc(s.webAppUrl) + '</span>' : '') + '</div><div class="grid3">' +
       '<label class="f"><span>Channel access token</span><input class="i" id="sTok" type="password" placeholder="' + (s.lineTokenSet ? 'ตั้งค่าแล้ว · กรอกเพื่อเปลี่ยน' : 'ยังไม่ได้ตั้งค่า') + '"></label>' +
-      '<label class="f"><span>Group ID / User ID ปลายทาง</span><input class="i mono" id="sTo" value="' + esc(s.lineTo || '') + '"></label>' +
+      '<label class="f"><span>กลุ่มที่รับแจ้งเตือน</span><select class="i" id="sTo"><option value="">— ยังไม่ได้เลือก —</option>' + (s.lineGroups || []).concat(s.lineTo && !(s.lineGroups || []).some(function (g) { return g.id === s.lineTo; }) ? [{ id: s.lineTo, name: 'กลุ่มที่ตั้งไว้ (' + s.lineTo.slice(0, 8) + '…)' }] : []).map(function (g) { return '<option value="' + esc(g.id) + '"' + (g.id === s.lineTo ? ' selected' : '') + '>' + esc(g.name) + '</option>'; }).join('') + '</select></label>' +
       '<label class="f"><span>แจ้งเตือนเมื่อระดับตั้งแต่</span><select class="i" id="sMin">' + SEV.map(function (x) { return '<option value="' + x.v + '"' + (+s.notifyMinSeverity === x.v ? ' selected' : '') + '>ระดับ ' + x.v + ' ขึ้นไป</option>'; }).join('') + '</select></label>' +
       '</div><div class="row"><button class="btn" type="button" id="sTest">ส่งข้อความทดสอบ</button></div></section>' +
       '<section class="panel stack"><h2>ข้อมูลจาก Google Form เดิม</h2><div class="grid2"><label class="f"><span>ชื่อชีตคำตอบเดิม</span><input class="i" id="sLeg" value="' + esc(s.legacySheet || '') + '"></label></div>' +
@@ -1085,7 +1085,7 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
     qs('#sSave', el).onclick = function () {
       var p = { orgName: qs('#sOrg', el).value.trim(), branches: arr('#sBr').map(function (l) { var k = l.split('='); return { code: k[0].trim().toUpperCase(), name: (k[1] || k[0]).trim() }; }),
         types: arr('#sTy'), categories: arr('#sCa'), departments: arr('#sDe'), locations: arr('#sLo'), reportPin: qs('#sPin', el).value.trim(),
-        appUrl: qs('#sUrl', el).value.trim(), lineTo: qs('#sTo', el).value.trim(), notifyMinSeverity: +qs('#sMin', el).value, legacySheet: qs('#sLeg', el).value.trim() };
+        appUrl: qs('#sUrl', el).value.trim(), lineTo: qs('#sTo', el).value, notifyMinSeverity: +qs('#sMin', el).value, legacySheet: qs('#sLeg', el).value.trim() };
       var tok = qs('#sTok', el).value.trim(); if (tok) p.lineToken = tok;
       busy(qs('#sSave', el), authed('saveSettings', p)).then(function () { toast('บันทึกการตั้งค่าแล้ว'); return call('bootstrap', state.token); }).then(function (b) { state.config = b.config; store('ir_config', JSON.stringify(b.config)); renderShell(); go('settings'); });
     };
