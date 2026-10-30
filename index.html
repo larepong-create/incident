@@ -188,6 +188,7 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
 .kpi.warn .v { color: var(--sev3); }
 .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 12px; padding: 3px; background: var(--surface); gap: 2px; flex-wrap: wrap; }
 .seg button { border: 0; background: none; padding: 5px 12px; border-radius: 9px; cursor: pointer; font-size: .86rem; color: var(--muted); font-weight: 500; }
+.seg.sm button { padding: 3px 10px; font-size: .8rem; }
 .seg button.on { background: var(--accent); color: var(--accent-ink); }
 .dgrid { display: grid; grid-template-columns: repeat(12, minmax(0, 1fr)); gap: 16px; }
 .c12 { grid-column: span 12; } .c8 { grid-column: span 8; } .c7 { grid-column: span 7; } .c6 { grid-column: span 6; } .c5 { grid-column: span 5; } .c4 { grid-column: span 4; }
@@ -343,6 +344,9 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
     if (withTime && m[4]) out += ' ' + m[4] + ':' + m[5] + ' น.';
     return out;
   }
+  function addDays(iso, n) { var d = new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10) + n)); return d.getUTCFullYear() + '-' + pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate()); }
+  function weekStart(iso) { var d = new Date(Date.UTC(+iso.slice(0, 4), +iso.slice(5, 7) - 1, +iso.slice(8, 10))); return addDays(iso, -((d.getUTCDay() + 6) % 7)); }
+  function weekLabel(mon) { var sun = addDays(mon, 6); return (+mon.slice(8, 10)) + (mon.slice(5, 7) === sun.slice(5, 7) ? '' : ' ' + TH_MON[+mon.slice(5, 7) - 1]) + '–' + thDate(sun); }
   function today() { var d = new Date(Date.now() + 7 * 3600000); return d.getUTCFullYear() + '-' + pad2(d.getUTCMonth() + 1) + '-' + pad2(d.getUTCDate()); }
   function nowStr() { var d = new Date(Date.now() + 7 * 3600000); return today() + ' ' + pad2(d.getUTCHours()) + ':' + pad2(d.getUTCMinutes()) + ':' + pad2(d.getUTCSeconds()); }
   function money(n) { n = +n || 0; return n ? n.toLocaleString('th-TH', { maximumFractionDigits: 2 }) : '0'; }
@@ -524,8 +528,8 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
   // ---------- state ----------
   var state = {
     config: DEFAULT_CONFIG, token: null, user: null, rows: null, view: 'report',
-    period: store('ir_period') || '3m', dashBranch: '',
-    filters: { q: '', status: '', branch: '', type: '', category: '', sev: '', dept: '', from: '', page: 1 }
+    period: store('ir_period') || '3m', trend: store('ir_trend') || 'm', dashBranch: '',
+    filters: { q: '', status: '', branch: '', type: '', category: '', sev: '', dept: '', from: '', month: '', week: '', claim: '', page: 1 }
   };
   try { var cc = JSON.parse(store('ir_config') || 'null'); if (cc && cc.types) state.config = cc; } catch (e) { }
 
@@ -784,9 +788,10 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
   }
 
   // ---------- dashboard ----------
-  var PERIODS = [['1m', 'เดือนนี้'], ['3m', '3 เดือน'], ['12m', '12 เดือน'], ['all', 'ทั้งหมด']];
+  var PERIODS = [['1w', 'สัปดาห์นี้'], ['1m', 'เดือนนี้'], ['3m', '3 เดือน'], ['12m', '12 เดือน'], ['all', 'ทั้งหมด']];
   function periodRange(p, shift) {
     var t = today(), y = +t.slice(0, 4), m = +t.slice(5, 7);
+    if (p === '1w') { var ws = addDays(weekStart(t), -7 * (shift || 0)); return { from: ws, to: addDays(ws, 6) }; }
     var n = p === '1m' ? 1 : p === '3m' ? 3 : p === '12m' ? 12 : 0;
     if (!n) return shift ? null : { from: '0000-00-00', to: '9999-99-99' };
     var endM = m - n * (shift || 0), sy = y, sm = endM - n + 1;
@@ -823,7 +828,7 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
       kpi('รุนแรง (ระดับ 3–4)', severe.length, severe.filter(function (r) { return r.severity === 4; }).length + ' เรื่องระดับ 4', severe.length ? 'warn' : '', 'k-sev') +
       kpi('มูลค่าเคลม / คืนเงิน', money(claim), 'บาท · ' + rows.filter(function (r) { return r.claim > 0; }).length + ' เรื่อง', '', 'k-claim') + '</div>' +
       '<div class="dgrid">' +
-      '<section class="panel c7"><div class="ptitle"><h2>แนวโน้มรายเดือน แยกตามประเภท</h2><span class="muted small">6 เดือนล่าสุด</span></div>' + trendChart(all) + '</section>' +
+      '<section class="panel c7"><div class="ptitle"><h2>แนวโน้ม' + (state.trend === 'w' ? 'รายสัปดาห์' : 'รายเดือน') + ' แยกตามประเภท</h2><div class="seg sm" id="dTr"><button type="button" data-t="w"' + (state.trend === 'w' ? ' class="on"' : '') + '>รายสัปดาห์</button><button type="button" data-t="m"' + (state.trend !== 'w' ? ' class="on"' : '') + '>รายเดือน</button></div></div>' + trendChart(all) + '<div class="muted small" style="margin-top:6px">' + (state.trend === 'w' ? '8 สัปดาห์ล่าสุด (จันทร์–อาทิตย์)' : '6 เดือนล่าสุด') + '</div></section>' +
       '<section class="panel c5"><div class="ptitle"><h2>ต้องติดตาม</h2><button class="btn sm" type="button" id="dOpen">ดูทั้งหมด ' + open.length + '</button></div>' +
       (attn.length ? '<div class="attn">' + attn.map(function (r) {
         return '<button type="button" data-id="' + esc(r.id) + '">' + sevBadge(r.severity, true) + '<span class="tx"><span class="mono">' + esc(r.id) + '</span> ' + esc(title(r)) + '</span><span class="muted small num">' + daysSince(r.createdAt) + ' วัน</span></button>';
@@ -836,6 +841,7 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
       '</div>';
 
     qsa('#dPer button', el).forEach(function (b) { b.onclick = function () { state.period = b.dataset.p; store('ir_period', state.period); viewDash(el); }; });
+    qsa('#dTr button', el).forEach(function (b) { b.onclick = function () { state.trend = b.dataset.t; store('ir_trend', state.trend); viewDash(el); }; });
     qsa('#dBr button', el).forEach(function (b) { b.onclick = function () { state.dashBranch = b.dataset.b; viewDash(el); }; });
     qsa('[data-id]', el).forEach(function (b) { b.onclick = function () { go('detail', b.dataset.id); }; });
     qs('#dOpen', el).onclick = function () { openList({ status: 'open' }); };
@@ -845,23 +851,25 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
     qs('[data-k="k-sev"]', el).onclick = function () { openList({ sev: '3+', from: from }); };
     qs('[data-k="k-claim"]', el).onclick = function () { openList({ claim: '1', from: from }); };
     qsa('[data-f]', el).forEach(function (b) {
-      b.onclick = function () { var f = {}; f[b.dataset.f] = b.dataset.fv; if (b.dataset.f !== 'month') f.from = from; openList(f); };
+      b.onclick = function () { var f = {}; f[b.dataset.f] = b.dataset.fv; if (b.dataset.f !== 'month' && b.dataset.f !== 'week') f.from = from; openList(f); };
     });
   }
   function kpi(l, v, d, cls, key) {
     return '<button type="button" class="kpi ' + cls + '" data-k="' + key + '"><span class="l">' + l + '</span><span class="v">' + v + '</span><span class="d">' + esc(d) + '</span></button>';
   }
   function openList(f) {
-    state.filters = { q: '', status: '', branch: state.dashBranch || '', type: '', category: '', sev: '', dept: '', from: '', month: '', claim: '', page: 1 };
+    state.filters = { q: '', status: '', branch: state.dashBranch || '', type: '', category: '', sev: '', dept: '', from: '', month: '', week: '', claim: '', page: 1 };
     for (var k in f) state.filters[k] = f[k];
     go('list');
   }
   function niceMax(v) { if (v <= 4) return 4; var p = Math.pow(10, Math.floor(Math.log10(v))), n = v / p; return (n <= 2 ? 2 : n <= 5 ? 5 : 10) * p / (n <= 2 ? 1 : 1); }
   function trendChart(rows) {
-    var types = state.config.types, t = today(), y = +t.slice(0, 4), m = +t.slice(5, 7), months = [];
-    for (var i = 5; i >= 0; i--) { var mm = m - i, yy = y; while (mm < 1) { mm += 12; yy--; } months.push(yy + '-' + pad2(mm)); }
+    var types = state.config.types, t = today(), y = +t.slice(0, 4), m = +t.slice(5, 7), months = [], wk = state.trend === 'w';
+    if (wk) { var ws = weekStart(t); for (var j = 7; j >= 0; j--) months.push(addDays(ws, -7 * j)); }
+    else for (var i = 5; i >= 0; i--) { var mm = m - i, yy = y; while (mm < 1) { mm += 12; yy--; } months.push(yy + '-' + pad2(mm)); }
+    function inB(r, mo) { var d = incDate(r); return wk ? d >= mo && d <= addDays(mo, 6) : d.slice(0, 7) === mo; }
     var data = months.map(function (mo) {
-      var rs = rows.filter(function (r) { return incDate(r).slice(0, 7) === mo; });
+      var rs = rows.filter(function (r) { return inB(r, mo); });
       var by = countBy(rs, function (r) { return types.indexOf(r.type) >= 0 ? r.type : '__other'; });
       return { mo: mo, total: rs.length, by: by };
     });
@@ -875,12 +883,12 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
     var ticks = [0, max / 2, max];
     var grid = ticks.map(function (v) { return '<div class="gl" style="bottom:' + (v / max * 100) + '%"></div>'; }).join('');
     var cols = data.map(function (d) {
-      var tip = '<b>' + monthLabel(d.mo) + '</b> · ' + d.total + ' เรื่อง' + keys.filter(function (k) { return d.by[k]; }).map(function (k) { return '<br>' + esc(lab(k)) + ': ' + d.by[k]; }).join('');
+      var tip = '<b>' + (wk ? weekLabel(d.mo) : monthLabel(d.mo)) + '</b> · ' + d.total + ' เรื่อง' + keys.filter(function (k) { return d.by[k]; }).map(function (k) { return '<br>' + esc(lab(k)) + ': ' + d.by[k]; }).join('');
       var segs = keys.filter(function (k) { return d.by[k]; }).map(function (k) { return '<div class="seg-b" style="height:calc(' + (d.by[k] / max * 100) + '% - 2px);background:' + col(k) + '"></div>'; }).join('');
-      return '<div class="col" data-f="month" data-fv="' + d.mo + '" data-tip="' + esc(tip) + '">' + segs + (d.total ? '<div class="tot">' + d.total + '</div>' : '') + '</div>';
+      return '<div class="col" data-f="' + (wk ? 'week' : 'month') + '" data-fv="' + d.mo + '" data-tip="' + esc(tip) + '">' + segs + (d.total ? '<div class="tot">' + d.total + '</div>' : '') + '</div>';
     }).join('');
     return legend + '<div class="cols"><div class="yax">' + ticks.map(function (v) { return '<span style="bottom:' + (v / max * 100) + '%">' + v + '</span>'; }).join('') + '</div>' +
-      '<div class="plot">' + grid + cols + '</div><div class="xax">' + data.map(function (d) { return '<span>' + monthLabel(d.mo, true) + '</span>'; }).join('') + '</div></div>';
+      '<div class="plot">' + grid + cols + '</div><div class="xax">' + data.map(function (d) { return '<span>' + (wk ? (+d.mo.slice(8, 10)) + ' ' + TH_MON[+d.mo.slice(5, 7) - 1] : monthLabel(d.mo, true)) + '</span>'; }).join('') + '</div></div>';
   }
   function monthLabel(mo, short) { var y = +mo.slice(0, 4) + 543, m = +mo.slice(5, 7); return TH_MON[m - 1] + (short ? ' ' + String(y).slice(2) : ' ' + y); }
   function hbars(map, filterKey, labelFn) {
@@ -922,6 +930,7 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
       if (f.dept && (r.departments || []).indexOf(f.dept) < 0) return false;
       if (f.from && incDate(r) < f.from) return false;
       if (f.month && incDate(r).slice(0, 7) !== f.month) return false;
+      if (f.week && (incDate(r) < f.week || incDate(r) > addDays(f.week, 6))) return false;
       if (f.claim && !(r.claim > 0)) return false;
       if (q && [r.id, r.detail, r.petRef, r.reporter, r.location, r.category, r.type].join(' ').toLowerCase().indexOf(q) < 0) return false;
       return true;
@@ -934,6 +943,7 @@ textarea.i { resize: vertical; min-height: 120px; line-height: 1.6; }
     if (f.dept) extra.push(['dept', 'แผนก: ' + f.dept]);
     if (f.from) extra.push(['from', 'ตั้งแต่ ' + thDate(f.from)]);
     if (f.month) extra.push(['month', 'เดือน ' + monthLabel(f.month)]);
+    if (f.week) extra.push(['week', 'สัปดาห์ ' + weekLabel(f.week)]);
     if (f.claim) extra.push(['claim', 'มีมูลค่าเคลม']);
     el.innerHTML = '<div class="head"><div><h1>รายการอุบัติการณ์</h1><div class="muted small" id="lCount"></div></div><button class="btn pri" type="button" id="lNew">' + ICON.add + 'แจ้งเหตุ</button></div>' +
       '<div class="panel" style="padding:12px"><div class="filters">' +
